@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import HOC from "../../layout/HOC";
-import { Table, Modal, Form, Button, Alert } from "react-bootstrap";
+import { Table, Modal, Form, Button, Alert, Row, Col } from "react-bootstrap";
 import { Dropdown, Menu } from "antd";
 import BreadCamp from "../Component/BreadCamp";
 import axios from "axios";
@@ -252,12 +252,7 @@ const ProjectAdmin = () => {
     };
 
     return (
-      <Modal
-        {...props}
-        size="lg"
-        aria-labelledby="contained-modal-title-vcenter"
-        centered
-      >
+      <Modal {...props} size="lg" aria-labelledby="contained-modal-title-vcenter" centered>
         <Modal.Header closeButton>
           <Modal.Title id="contained-modal-title-vcenter">
             {edit ? "Edit Project" : "Add Project"}
@@ -265,210 +260,176 @@ const ProjectAdmin = () => {
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleSubmit}>
-            <Form.Group className="mb-3">
-              <Form.Label>Project Image</Form.Label>
-              <Form.Control
-                type="file"
-                onChange={handleImageChange}
-                {...(edit ? {} : { required: true })}
-              />
-            </Form.Group>
-            {imagePreview && (
-              <div className="image-preview">
-                <img
-                  src={imagePreview}
-                  alt="Selected"
-                  style={{ maxWidth: "100%", height: "auto" }}
-                />
-              </div>
-            )}
-            <Form.Group className="mb-3">
-              <Form.Label>Project Name</Form.Label>
-              <Form.Control
-                value={projectName}
-                type="text"
-                required
-                onChange={(e) => setProjectName(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Project Short Description</Form.Label>
-              <Form.Control
-                value={projectShortDescription}
-                type="text"
-                required
-                onChange={(e) => setProjectShortDescription(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Project Type</Form.Label>
-              <Form.Select
-                value={selectedProjectType}
-                onChange={(e) => setSelectedProjectType(e.target.value)}
-                required
-              >
-                <option value="">Select existing or create new</option>
-                {projectTypes.map((type) => (
-                  <option key={type._id} value={type._id}>
-                    {type.project_type}
-                  </option>
+            <Row className="mb-4">
+              <Col md={12}>
+                <h5 className="mb-3">Project Information</h5>
+                <Form.Group className="mb-3">
+                  <Form.Label>Project Image</Form.Label>
+                  <Form.Control type="file" onChange={handleImageChange} {...(edit ? {} : { required: true })} />
+                </Form.Group>
+                {imagePreview && (
+                  <div className="image-preview my-3">
+                    <img src={imagePreview} alt="Selected" className="img-fluid rounded" />
+                  </div>
+                )}
+                <Form.Group className="mb-3">
+                  <Form.Label>Project Name</Form.Label>
+                  <Form.Control value={projectName} type="text" required onChange={(e) => setProjectName(e.target.value)} />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Project Short Description</Form.Label>
+                  <Form.Control value={projectShortDescription} type="text" required onChange={(e) => setProjectShortDescription(e.target.value)} />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Project Type</Form.Label>
+                  <Form.Select value={selectedProjectType} onChange={(e) => setSelectedProjectType(e.target.value)} required>
+                    <option value="">Select existing or create new</option>
+                    {projectTypes.map((type) => (
+                      <option key={type._id} value={type._id}>
+                        {type.project_type}
+                      </option>
+                    ))}
+                    <option value="new">Create New Project Type</option>
+                  </Form.Select>
+                </Form.Group>
+                {selectedProjectType === "new" && (
+                  <>
+                    <Form.Group className="mb-3">
+                      <Form.Label>New Project Type</Form.Label>
+                      <Form.Control value={newProjectType.project_type} type="text" required onChange={(e) => setNewProjectType({ ...newProjectType, project_type: e.target.value })} />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Type Description</Form.Label>
+                      <Form.Control value={newProjectType.type_description} type="text" required onChange={(e) => setNewProjectType({ ...newProjectType, type_description: e.target.value })} />
+                    </Form.Group>
+                  </>
+                )}
+              </Col>
+            </Row>
+            <hr />
+
+            <Row className="mb-4">
+              <Col md={12}>
+                <h5 className="mb-3">Sections</h5>
+                <Form.Group className="mb-3">
+                  <Form.Label>Main Heading</Form.Label>
+                  <Form.Control value={sections.mainHeading} type="text" required placeholder="Main Heading" onChange={(e) => setSections({ ...sections, mainHeading: e.target.value })} />
+                </Form.Group>
+                {["one", "two", "three"].map((num) => (
+                  <Row key={num} className="mb-3">
+                    <Col md={6}>
+                      <Form.Control value={sections[`sub_sections_${num}`].title} type="text" required placeholder={`Sub Section ${num} Title`} onChange={(e) => setSections({ ...sections, [`sub_sections_${num}`]: { ...sections[`sub_sections_${num}`], title: e.target.value } })} />
+                    </Col>
+                    <Col md={6}>
+                      <Form.Control value={sections[`sub_sections_${num}`].description} as="textarea" required placeholder={`Sub Section ${num} Description`} onChange={(e) => setSections({ ...sections, [`sub_sections_${num}`]: { ...sections[`sub_sections_${num}`], description: e.target.value } })} />
+                    </Col>
+                  </Row>
                 ))}
-                <option value="new">Create New Project Type</option>
-              </Form.Select>
-            </Form.Group>
-            {selectedProjectType === "new" && (
-              <>
+              </Col>
+            </Row>
+            <hr />
+
+            <Row className="mb-4">
+              <Col md={12}>
+                <h5 className="mb-3">Gallery</h5>
                 <Form.Group className="mb-3">
-                  <Form.Label>New Project Type</Form.Label>
-                  <Form.Control
-                    value={newProjectType.project_type}
-                    type="text"
-                    required
-                    onChange={(e) => setNewProjectType({ ...newProjectType, project_type: e.target.value })}
-                  />
+                  <Form.Control value={gallery.heading} type="text" required placeholder="Gallery Heading" onChange={(e) => setGallery({ ...gallery, heading: e.target.value })} />
                 </Form.Group>
                 <Form.Group className="mb-3">
-                  <Form.Label>Type Description</Form.Label>
-                  <Form.Control
-                    value={newProjectType.type_description}
-                    type="text"
-                    required
-                    onChange={(e) => setNewProjectType({ ...newProjectType, type_description: e.target.value })}
-                  />
+                  <Form.Control value={gallery.subheading} type="text" required placeholder="Gallery Subheading" onChange={(e) => setGallery({ ...gallery, subheading: e.target.value })} />
                 </Form.Group>
-              </>
-            )}
-            <Form.Group className="mb-3">
-              <Form.Label>Sections</Form.Label>
-              <Form.Control
-                value={sections.mainHeading}
-                type="text"
-                placeholder="Main Heading"
-                required
-                onChange={(e) => setSections({ ...sections, mainHeading: e.target.value })}
-              />
-              {['one', 'two', 'three'].map((num) => (
-                <div key={num}>
-                  <Form.Control
-                    value={sections[`sub_sections_${num}`].title}
-                    type="text"
-                    placeholder={`Sub Section ${num} Title`}
-                    required
-                    onChange={(e) => setSections({
-                      ...sections,
-                      [`sub_sections_${num}`]: { ...sections[`sub_sections_${num}`], title: e.target.value }
-                    })}
-                  />
-                  <Form.Control
-                    value={sections[`sub_sections_${num}`].description}
-                    as="textarea"
-                    placeholder={`Sub Section ${num} Description`}
-                    required
-                    onChange={(e) => setSections({
-                      ...sections,
-                      [`sub_sections_${num}`]: { ...sections[`sub_sections_${num}`], description: e.target.value }
-                    })}
-                  />
+                <Form.Group className="mb-3">
+                  <Form.Control type="file" multiple onChange={handleGalleryImagesChange} />
+                </Form.Group>
+                <div className="gallery-preview d-flex flex-wrap gap-3">
+                  {gallery.images.map((image, index) => (
+                    <div key={index} className="position-relative">
+                      <img src={image} alt={`Gallery ${index}`} className="rounded img-fluid" style={{ width: "100px", height: "100px", objectFit: "cover" }} />
+                      <button type="button" className="btn btn-danger btn-sm position-absolute top-0 end-0" onClick={() => removeGalleryImage(index, true)}>
+                        &times;
+                      </button>
+                    </div>
+                  ))}
+                  {newGalleryImages.map((image, index) => (
+                    <div key={`new-${index}`} className="position-relative">
+                      <img src={URL.createObjectURL(image)} alt={`New Gallery ${index}`} className="rounded img-fluid" style={{ width: "100px", height: "100px", objectFit: "cover" }} />
+                      <button type="button" className="btn btn-danger btn-sm position-absolute top-0 end-0" onClick={() => removeGalleryImage(index)}>
+                        &times;
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Gallery</Form.Label>
-              <Form.Control
-                value={gallery.heading}
-                type="text"
-                placeholder="Gallery Heading"
-                required
-                onChange={(e) => setGallery({ ...gallery, heading: e.target.value })}
-              />
-              <Form.Control
-                value={gallery.subheading}
-                type="text"
-                placeholder="Gallery Subheading"
-                required
-                onChange={(e) => setGallery({ ...gallery, subheading: e.target.value })}
-              />
-              <Form.Control
-                type="file"
-                multiple
-                onChange={handleGalleryImagesChange}
-              />
-              <div className="gallery-preview">
-                {gallery.images.map((image, index) => (
-                  <div key={index} className="gallery-image">
-                    <img src={image} alt={`Gallery ${index}`} style={{ width: "100px", height: "100px", objectFit: "cover" }} />
-                    <button type="button" onClick={() => removeGalleryImage(index, true)}>Remove</button>
-                  </div>
-                ))}
-                {newGalleryImages.map((image, index) => (
-                  <div key={`new-${index}`} className="gallery-image">
-                    <img src={URL.createObjectURL(image)} alt={`New Gallery ${index}`} style={{ width: "100px", height: "100px", objectFit: "cover" }} />
-                    <button type="button" onClick={() => removeGalleryImage(index)}>Remove</button>
-                  </div>
-                ))}
-              </div>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Project Details</Form.Label>
-              <Form.Control
-                value={projectDetails.heading}
-                type="text"
-                placeholder="Project Details Heading"
-                required
-                onChange={(e) => setProjectDetails({ ...projectDetails, heading: e.target.value })}
-              />
-              <Form.Control
-                value={projectDetails.subheading}
-                type="text"
-                placeholder="Project Details Subheading"
-                required
-                onChange={(e) => setProjectDetails({ ...projectDetails, subheading: e.target.value })}
-              />
-              <Form.Control
-                value={projectDetails.videoURL}
-                type="text"
-                placeholder="Project Details Video URL"
-                onChange={(e) => setProjectDetails({ ...projectDetails, videoURL: e.target.value })}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Additional Media</Form.Label>
-              <Form.Control
-                value={additionalMedia.title}
-                type="text"
-                placeholder="Additional Media Title"
-                required
-                onChange={(e) => setAdditionalMedia({ ...additionalMedia, title: e.target.value })}
-              />
-              <Form.Control
-                value={additionalMedia.headingDescription}
-                type="text"
-                placeholder="Additional Media Heading Description"
-                required
-                onChange={(e) => setAdditionalMedia({ ...additionalMedia, headingDescription: e.target.value })}
-              />
-              <Editor
-                value={additionalMedia.description}
-                onTextChange={(e) => setAdditionalMedia({ ...additionalMedia, description: e.htmlValue })}
-                style={{ height: "200px" }}
-              />
-              <Form.Control
-                value={additionalMedia.videoLink}
-                type="text"
-                placeholder="Additional Media Video Link"
-                onChange={(e) => setAdditionalMedia({ ...additionalMedia, videoLink: e.target.value })}
-              />
-            </Form.Group>
-            <Button
-              style={{
-                backgroundColor: "#19376d",
-                borderRadius: "0",
-                border: "1px solid #19376d",
-              }}
-              type="submit"
-            >
-              {edit ? "Update" : "Submit"}
-            </Button>
+              </Col>
+            </Row>
+            <hr />
+
+            <Row className="mb-4">
+              <Col md={12}>
+                <h5 className="mb-3">Project Details</h5>
+                <Form.Group className="mb-3">
+                  <Form.Control value={projectDetails.heading} type="text" required placeholder="Project Details Heading" onChange={(e) => setProjectDetails({ ...projectDetails, heading: e.target.value })} />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Control value={projectDetails.subheading} type="text" required placeholder="Project Details Subheading" onChange={(e) => setProjectDetails({ ...projectDetails, subheading: e.target.value })} />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Control value={projectDetails.videoURL} type="text" placeholder="Video URL" onChange={(e) => setProjectDetails({ ...projectDetails, videoURL: e.target.value })} />
+                </Form.Group>
+              </Col>
+            </Row>
+            <hr />
+
+            <Row className="mb-4">
+              <Col md={12}>
+                <h5 className="mb-3">Additional Media</h5>
+
+                {/* Additional Media Title */}
+                <Form.Group className="mb-3">
+                  <Form.Control
+                    value={additionalMedia.title}
+                    type="text"
+                    required
+                    placeholder="Additional Media Title"
+                    onChange={(e) => setAdditionalMedia({ ...additionalMedia, title: e.target.value })}
+                  />
+                </Form.Group>
+
+                {/* Heading Description */}
+                <Form.Group className="mb-3">
+                  <Form.Control
+                    value={additionalMedia.headingDescription}
+                    type="text"
+                    required
+                    placeholder="Heading Description"
+                    onChange={(e) => setAdditionalMedia({ ...additionalMedia, headingDescription: e.target.value })}
+                  />
+                </Form.Group>
+
+                {/* Description Editor */}
+                <Editor
+                  value={additionalMedia.description}
+                  onTextChange={(e) => setAdditionalMedia({ ...additionalMedia, description: e.htmlValue })}
+                  style={{ height: "200px" }}
+                />
+
+                {/* Additional Media Video Link */}
+                <Form.Group className="mb-3">
+                  <Form.Control
+                    value={additionalMedia.videoLink}
+                    type="text"
+                    placeholder="Additional Media Video Link"
+                    onChange={(e) => setAdditionalMedia({ ...additionalMedia, videoLink: e.target.value })}
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <div className="d-flex justify-content-end">
+              <Button variant="secondary" onClick={props.onHide}>Cancel</Button>
+              <Button variant="primary" type="submit" className="ms-2">
+                {edit ? "Update Project" : "Add Project"}
+              </Button>
+            </div>
           </Form>
         </Modal.Body>
       </Modal>

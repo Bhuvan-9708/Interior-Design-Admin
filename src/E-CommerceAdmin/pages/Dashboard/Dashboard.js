@@ -10,12 +10,12 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const [customer, setCustomer] = useState();
-  const [admin,setAdmin] = useState();
+  const [admin, setAdmin] = useState();
   const [product, setProduct] = useState();
   const [job, setJob] = useState();
-  const [apllication,setApllication] = useState();
+  const [apllication, setApllication] = useState();
   const getProducts = async () => {
-    
+
     let url = `${BaseUrl()}api/contact/get-all-mail`;
     try {
       const res = await axios.get(url, {
@@ -25,14 +25,14 @@ const Dashboard = () => {
       });
 
       setCustomer(res.data.data);
-  
+
     } catch (error) {
-      
+
     }
   };
 
   const getProductsAdmin = async () => {
-   
+
     let url = `${BaseUrl()}api/auth/get-all-admin`;
     try {
       const res = await axios.get(url, {
@@ -44,12 +44,12 @@ const Dashboard = () => {
       setAdmin(res.data.data);
 
     } catch (error) {
-      
+
     }
   };
 
   const getProductsJobs = async () => {
-    let url = `${BaseUrl()}api/jobs/all-jobs`;
+    let url = `${BaseUrl()}api/career/get-all-career`;
     try {
       const res = await axios.get(url, {
         headers: {
@@ -59,7 +59,7 @@ const Dashboard = () => {
 
       setProduct(res.data.data);
     } catch (error) {
-      
+
     }
   };
 
@@ -74,17 +74,17 @@ const Dashboard = () => {
 
       setJob(res.data.data);
     } catch (error) {
-      
+
     }
   };
   const fetchDataApllication = async () => {
     try {
       const { data } = await axios.get(
-        `${BaseUrl()}api/career/get-all-application`
+        `${BaseUrl()}api/project/projects`
       );
       setApllication(data?.data);
     } catch (e) {
-    
+
     }
   };
 
@@ -101,7 +101,7 @@ const Dashboard = () => {
   const card = [
     {
       progress: "bg-green-400",
-      title: "Total candidate",
+      title: "Contact Forms",
       number: (customer && customer.length) || 0,
       icon: (
         <i
@@ -122,7 +122,7 @@ const Dashboard = () => {
     },
     {
       progress: "bg-green-400",
-      title: "Total Jobs",
+      title: "Total Career Forms",
       number: (product && product.length) || 0,
       icon: <i className="fa-solid fa-box text-2xl text-[#3c335d]"></i>,
       bg: "#3c335d",
@@ -138,7 +138,7 @@ const Dashboard = () => {
     },
     {
       progress: "bg-green-400",
-      title: "Total Applications",
+      title: "Total Projects",
       number: (apllication && apllication.length) || 0,
       icon: <i className=" fa-brands fa-slack text-2xl text-[#64878e]"></i>,
       bg: "#063970",

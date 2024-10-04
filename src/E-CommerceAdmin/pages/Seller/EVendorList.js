@@ -9,12 +9,12 @@ import BaseUrl from "../../../BaseUrl";
 import axios from "axios";
 
 const EVendorList = () => {
- 
+
 
   //  api calling single data
   const [data, setData] = useState([]);
   const getProducts = async () => {
-   
+
     let url = `${BaseUrl()}api/auth/get-all-admin`;
     try {
       const res = await axios.get(url, {
@@ -24,9 +24,9 @@ const EVendorList = () => {
       });
 
       setData(res.data.data);
-      
+
     } catch (error) {
-      
+
     }
   };
 
@@ -35,15 +35,15 @@ const EVendorList = () => {
   }, []);
 
   //delete data
-  const handleDelete=async(id)=>{
+  const handleDelete = async (id) => {
     try {
-      const res=await axios.delete(`${BaseUrl()}api/v1/`,{
-        headers:{
+      const res = await axios.delete(`${BaseUrl()}api/v1/`, {
+        headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         }
       })
     } catch (error) {
-     
+
     }
   }
 
@@ -59,11 +59,11 @@ const EVendorList = () => {
 
   const TotolData = query
     ? data?.filter(
-        (i) =>
-          i?.name?.toLowerCase().includes(query?.toLowerCase()) ||
-          // i?.number?.toLowerCase().includes(query?.toLowerCase()) ||
-          i?.email?.toLowerCase().includes(query?.toLowerCase())
-      )
+      (i) =>
+        i?.name?.toLowerCase().includes(query?.toLowerCase()) ||
+        // i?.number?.toLowerCase().includes(query?.toLowerCase()) ||
+        i?.email?.toLowerCase().includes(query?.toLowerCase())
+    )
     : data;
 
   useEffect(() => {
@@ -135,7 +135,7 @@ const EVendorList = () => {
                     <tr key={index}>
                       <td>#{index + 1} </td>
                       <td> {i.email} </td>
-                      <td> Admin </td>
+                      <td> {i.password} </td>
                     </tr>
                   ))}
                 </tbody>
