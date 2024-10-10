@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import HOC from "../../layout/HOC";
-import { Table, Modal, Form, Button, Alert, Row, Col } from "react-bootstrap";
+import { Table, Modal, Form, Button, Alert, Row, Image, Col } from "react-bootstrap";
 import { Dropdown, Menu } from "antd";
 import BreadCamp from "../Component/BreadCamp";
 import axios from "axios";
@@ -106,6 +106,7 @@ const ProjectAdmin = () => {
   }
 
   function MyVerticallyCenteredModal(props) {
+    const { edit, editData, onHide, show } = props;
     const [projectName, setProjectName] = useState("");
     const [projectShortDescription, setProjectShortDescription] = useState("");
     const [selectedProjectType, setSelectedProjectType] = useState("");
@@ -134,37 +135,63 @@ const ProjectAdmin = () => {
       title: "",
       headingDescription: "",
       description: "",
-      videoLink: "",
+      additional_image: null,
     });
-
+    const [additionalImagePreview, setAdditionalImagePreview] = useState(null);
     useEffect(() => {
-      if (edit) {
-        setId(editData?._id);
-        setProjectName(editData?.projectName);
-        setProjectShortDescription(editData?.projectShortDescription);
-        setSelectedProjectType(editData?.projectType?._id || "");
-        setProjectImage(editData?.projectImage);
-        setImagePreview(editData?.projectImage);
-        setSections(editData?.sections);
-        setGallery({
-          heading: editData?.gallery?.heading || "",
-          subheading: editData?.gallery?.subheading || "",
-          images: editData?.gallery?.images || [],
+      if (edit && editData) {
+        // setId(editData?._id);
+        setProjectName(editData.projectName || "");
+        setProjectShortDescription(editData.projectShortDescription || "");
+        setSelectedProjectType(editData.projectType?._id || "");
+        setImagePreview(editData.projectImage || null);
+        setSections(editData.sections || {
+          mainHeading: "",
+          sub_sections_one: { title: "", description: "" },
+          sub_sections_two: { title: "", description: "" },
+          sub_sections_three: { title: "", description: "" },
         });
-        setNewGalleryImages([]);
-        setProjectDetails(editData?.projectDetails);
-        setAdditionalMedia(editData?.additionalMedia);
+        setGallery({
+          heading: editData.gallery?.heading || "",
+          subheading: editData.gallery?.subheading || "",
+          images: editData.gallery?.images || [],
+        });
+        setProjectDetails({
+          heading: editData.projectDetails?.heading || "",
+          subheading: editData.projectDetails?.subheading || "",
+          videoURL: editData.projectDetails?.videoURL || "",
+        });
+        setAdditionalMedia({
+          title: editData.additionalMedia?.title || "",
+          headingDescription: editData.additionalMedia?.headingDescription || "",
+          description: editData.additionalMedia?.description || "",
+          additional_image: null,
+        });
+        setAdditionalImagePreview(editData.additionalMedia?.additional_image || null);
       } else {
         resetForm();
       }
     }, [edit, editData]);
 
+
+    const handleAdditionalMediaChange = (e) => {
+      const { name, value } = e.target;
+      setAdditionalMedia(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleAdditionalImageChange = (e) => {
+      if (e.target.files && e.target.files[0]) {
+        const file = e.target.files[0];
+        setAdditionalMedia(prev => ({ ...prev, additional_image: file }));
+        setAdditionalImagePreview(URL.createObjectURL(file));
+      }
+    };
+
     const resetForm = () => {
       setProjectName("");
       setProjectShortDescription("");
       setSelectedProjectType("");
-      setNewProjectType({ project_type: "", type_description: "" });
-      setProjectImage("");
+      setProjectImage(null);
       setImagePreview(null);
       setSections({
         mainHeading: "",
@@ -175,8 +202,10 @@ const ProjectAdmin = () => {
       setGallery({ heading: "", subheading: "", images: [] });
       setNewGalleryImages([]);
       setProjectDetails({ heading: "", subheading: "", videoURL: "" });
-      setAdditionalMedia({ title: "", headingDescription: "", description: "", videoLink: "" });
+      setAdditionalMedia({ title: "", headingDescription: "", description: "", additional_image: null });
+      setAdditionalImagePreview(null);
     };
+
 
     const handleImageChange = (e) => {
       const file = e.target.files[0];
@@ -207,31 +236,34 @@ const ProjectAdmin = () => {
       const formData = new FormData();
       formData.append("projectName", projectName);
       formData.append("projectShortDescription", projectShortDescription);
+      formData.append("projectType", selectedProjectType);
 
-      // Handle project type
-      if (selectedProjectType === "new") {
-        if (!newProjectType.project_type || !newProjectType.type_description) {
-          nofification("Project type and description are required", "error");
-          return;
-        }
-        // Append new project type fields separately
-        formData.append("projectType", newProjectType.project_type);
-        formData.append("type_description", newProjectType.type_description);
-      } else {
-        // Append existing project type ID
-        formData.append("projectType", selectedProjectType);
+      if (projectImage) {
+        formData.append("projectImage", projectImage);
       }
 
-      formData.append("projectImage", projectImage);
       formData.append("sections", JSON.stringify(sections));
       formData.append("gallery", JSON.stringify({ heading: gallery.heading, subheading: gallery.subheading }));
 
+      gallery.images.forEach((image, index) => {
+        formData.append(`existingGalleryImages[${index}]`, image);
+      });
+
       newGalleryImages.forEach((image) => {
-        formData.append("galleryImages", image);
+        formData.append("newGalleryImages", image);
       });
 
       formData.append("projectDetails", JSON.stringify(projectDetails));
-      formData.append("additionalMedia", JSON.stringify(additionalMedia));
+
+      formData.append("additionalMedia", JSON.stringify({
+        title: additionalMedia.title,
+        headingDescription: additionalMedia.headingDescription,
+        description: additionalMedia.description,
+      }));
+
+      if (additionalMedia.additional_image instanceof File) {
+        formData.append('additionalImage', additionalMedia.additional_image);
+      }
 
       try {
         if (edit) {
@@ -251,8 +283,9 @@ const ProjectAdmin = () => {
       }
     };
 
+
     return (
-      <Modal {...props} size="lg" aria-labelledby="contained-modal-title-vcenter" centered>
+      <Modal show={show} onHide={onHide} size="lg" aria-labelledby="contained-modal-title-vcenter" centered>
         <Modal.Header closeButton>
           <Modal.Title id="contained-modal-title-vcenter">
             {edit ? "Edit Project" : "Add Project"}
@@ -265,11 +298,11 @@ const ProjectAdmin = () => {
                 <h5 className="mb-3">Project Information</h5>
                 <Form.Group className="mb-3">
                   <Form.Label>Project Image</Form.Label>
-                  <Form.Control type="file" onChange={handleImageChange} {...(edit ? {} : { required: true })} />
+                  <Form.Control type="file" onChange={handleImageChange} />
                 </Form.Group>
                 {imagePreview && (
                   <div className="image-preview my-3">
-                    <img src={imagePreview} alt="Selected" className="img-fluid rounded" />
+                    <img src={imagePreview} alt="Selected" className="img-fluid rounded" style={{ maxWidth: '200px' }} />
                   </div>
                 )}
                 <Form.Group className="mb-3">
@@ -385,47 +418,55 @@ const ProjectAdmin = () => {
 
                 {/* Additional Media Title */}
                 <Form.Group className="mb-3">
+                  <Form.Label>Title</Form.Label>
                   <Form.Control
-                    value={additionalMedia.title}
                     type="text"
+                    name="title"
+                    value={additionalMedia.title}
+                    onChange={handleAdditionalMediaChange}
                     required
                     placeholder="Additional Media Title"
-                    onChange={(e) => setAdditionalMedia({ ...additionalMedia, title: e.target.value })}
                   />
                 </Form.Group>
-
-                {/* Heading Description */}
                 <Form.Group className="mb-3">
+                  <Form.Label>Heading Description</Form.Label>
                   <Form.Control
-                    value={additionalMedia.headingDescription}
                     type="text"
+                    name="headingDescription"
+                    value={additionalMedia.headingDescription}
+                    onChange={(e) => setAdditionalMedia({ ...additionalMedia, headingDescription: e.target.value })}
                     required
                     placeholder="Heading Description"
-                    onChange={(e) => setAdditionalMedia({ ...additionalMedia, headingDescription: e.target.value })}
                   />
                 </Form.Group>
 
-                {/* Description Editor */}
-                <Editor
-                  value={additionalMedia.description}
-                  onTextChange={(e) => setAdditionalMedia({ ...additionalMedia, description: e.htmlValue })}
-                  style={{ height: "200px" }}
-                />
-
-                {/* Additional Media Video Link */}
                 <Form.Group className="mb-3">
-                  <Form.Control
-                    value={additionalMedia.videoLink}
-                    type="text"
-                    placeholder="Additional Media Video Link"
-                    onChange={(e) => setAdditionalMedia({ ...additionalMedia, videoLink: e.target.value })}
+                  <Form.Label>Description</Form.Label>
+                  <Editor
+                    value={additionalMedia.description}
+                    onTextChange={(e) => setAdditionalMedia(prev => ({ ...prev, description: e.htmlValue || '' }))}
+                    style={{ height: "200px" }}
                   />
                 </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Additional Image</Form.Label>
+                  <Form.Control
+                    type="file"
+                    onChange={handleAdditionalImageChange}
+                    accept="image/*"
+                  />
+                </Form.Group>
+                {additionalImagePreview && (
+                  <div className="image-preview my-3">
+                    <Image src={additionalImagePreview} alt="Additional Media Preview" fluid rounded style={{ maxWidth: '200px' }} />
+                  </div>
+                )}
               </Col>
             </Row>
 
             <div className="d-flex justify-content-end">
-              <Button variant="secondary" onClick={props.onHide}>Cancel</Button>
+              <Button variant="secondary" onClick={onHide}>Cancel</Button>
               <Button variant="primary" type="submit" className="ms-2">
                 {edit ? "Update Project" : "Add Project"}
               </Button>
@@ -441,6 +482,8 @@ const ProjectAdmin = () => {
       <MyVerticallyCenteredModal
         show={modalShow}
         onHide={() => setModalShow(false)}
+        edit={edit}
+        editData={editData}
       />
 
       <section>
