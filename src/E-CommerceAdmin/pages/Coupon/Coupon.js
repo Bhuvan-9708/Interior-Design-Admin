@@ -248,18 +248,22 @@ const ProjectAdmin = () => {
       }
 
       formData.append("sections", JSON.stringify(sections));
-      formData.append("gallery", JSON.stringify({ heading: gallery.heading, subheading: gallery.subheading }));
+      formData.append("gallery", JSON.stringify({
+        heading: gallery.heading,
+        subheading: gallery.subheading
+      }));
 
+      // Append existing gallery images
       gallery.images.forEach((image, index) => {
-        formData.append(`existingGalleryImages[${index}]`, image);
+        formData.append(`existingGalleryImages`, image);
       });
 
-      newGalleryImages.forEach((image) => {
-        formData.append("newGalleryImages", image);
+      // Append new gallery images
+      newGalleryImages.forEach((image, index) => {
+        formData.append(`galleryImages`, image);
       });
 
       formData.append("projectDetails", JSON.stringify(projectDetails));
-
       formData.append("additionalMedia", JSON.stringify({
         title: additionalMedia.title,
         headingDescription: additionalMedia.headingDescription,
