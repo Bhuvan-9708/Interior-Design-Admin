@@ -236,7 +236,12 @@ const ProjectAdmin = () => {
       const formData = new FormData();
       formData.append("projectName", projectName);
       formData.append("projectShortDescription", projectShortDescription);
-      formData.append("projectType", selectedProjectType);
+      if (selectedProjectType === "new") {
+        formData.append("projectType", newProjectType.project_type);
+        formData.append("type_description", newProjectType.type_description);  // Append type description
+      } else {
+        formData.append("projectType", selectedProjectType);
+      }
 
       if (projectImage) {
         formData.append("projectImage", projectImage);
