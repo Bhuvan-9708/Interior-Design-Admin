@@ -1,4 +1,4 @@
 
 export default function BaseUrl() {
-  return "http://localhost:5000/";
+  return "https://backend-interior.onrender.com/";
 }
