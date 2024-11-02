@@ -233,37 +233,44 @@ const ProjectAdmin = () => {
 
     const handleSubmit = async (e) => {
       e.preventDefault();
+
       const formData = new FormData();
       formData.append("projectName", projectName);
       formData.append("projectShortDescription", projectShortDescription);
+
+      // Append project type based on selection
       if (selectedProjectType === "new") {
         formData.append("projectType", newProjectType.project_type);
-        formData.append("type_description", newProjectType.type_description);  // Append type description
+        formData.append("type_description", newProjectType.type_description);
       } else {
         formData.append("projectType", selectedProjectType);
       }
 
       if (projectImage) {
         formData.append("projectImage", projectImage);
+      } else {
+        console.warn("Project image is missing.");
       }
 
       formData.append("sections", JSON.stringify(sections));
+
       formData.append("gallery", JSON.stringify({
         heading: gallery.heading,
         subheading: gallery.subheading
       }));
 
-      // Append existing gallery images
-      gallery.images.forEach((image, index) => {
-        formData.append(`existingGalleryImages`, image);
+      gallery.images.forEach((image) => {
+        if (image instanceof File) {
+          formData.append(`existingGalleryImages`, image);
+        }
       });
 
-      // Append new gallery images
-      newGalleryImages.forEach((image, index) => {
+      newGalleryImages.forEach((image) => {
         formData.append(`galleryImages`, image);
       });
 
       formData.append("projectDetails", JSON.stringify(projectDetails));
+
       formData.append("additionalMedia", JSON.stringify({
         title: additionalMedia.title,
         headingDescription: additionalMedia.headingDescription,
@@ -271,27 +278,34 @@ const ProjectAdmin = () => {
       }));
 
       if (additionalMedia.additional_image instanceof File) {
-        formData.append('additionalImage', additionalMedia.additional_image);
+        formData.append("additionalImage", additionalMedia.additional_image);
       }
 
       try {
-        if (edit) {
-          await axios.put(`${BaseUrl()}api/project/update-project/${id}`, formData);
-          nofification("Project Updated Successfully", "success");
-        } else {
-          await axios.post(`${BaseUrl()}api/project/create-project`, formData);
-          nofification("Project Added Successfully", "success");
-        }
+        const url = edit
+          ? `${BaseUrl()}api/project/update-project/${id}`
+          : `${BaseUrl()}api/project/create-project`;
+        const requestMethod = edit ? axios.put : axios.post;
+
+        // Submit form data
+        await requestMethod(url, formData);
+
+        // Notification and refreshing actions
+        nofification(edit ? "Project Updated Successfully" : "Project Added Successfully", "success");
         getProjects();
         getProjectTypes();
         props.onHide();
         resetForm();
+
       } catch (error) {
         console.error("Error submitting project:", error);
-        nofification(error.response?.data?.message || "Failed to submit project", "error");
+
+        nofification(
+          error.response?.data?.message || "An error occurred while submitting the project. Please try again.",
+          "error"
+        );
       }
     };
-
 
     return (
       <Modal show={show} onHide={onHide} size="lg" aria-labelledby="contained-modal-title-vcenter" centered>
@@ -555,7 +569,7 @@ const ProjectAdmin = () => {
                         <td>
                           <img
                             src={i?.projectImage}
-                            alt=""
+                            alt={i?.projectName}
                             style={{ width: "100px" }}
                           />
                         </td>
