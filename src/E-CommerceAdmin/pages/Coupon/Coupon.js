@@ -276,11 +276,9 @@ const ProjectAdmin = () => {
         headingDescription: additionalMedia.headingDescription,
         description: additionalMedia.description,
       }));
-
       if (additionalMedia.additional_image instanceof File) {
         formData.append("additionalImage", additionalMedia.additional_image);
       }
-
       try {
         const url = edit
           ? `${BaseUrl()}api/project/update-project/${id}`
