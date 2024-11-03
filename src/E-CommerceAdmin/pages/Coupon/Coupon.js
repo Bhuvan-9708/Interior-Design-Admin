@@ -140,7 +140,7 @@ const ProjectAdmin = () => {
     const [additionalImagePreview, setAdditionalImagePreview] = useState(null);
     useEffect(() => {
       if (edit && editData) {
-        // setId(editData?._id);
+        setId(editData?._id);
         setProjectName(editData.projectName || "");
         setProjectShortDescription(editData.projectShortDescription || "");
         setSelectedProjectType(editData.projectType?._id || "");
@@ -276,9 +276,11 @@ const ProjectAdmin = () => {
         headingDescription: additionalMedia.headingDescription,
         description: additionalMedia.description,
       }));
+
       if (additionalMedia.additional_image instanceof File) {
         formData.append("additionalImage", additionalMedia.additional_image);
       }
+
       try {
         const url = edit
           ? `${BaseUrl()}api/project/update-project/${id}`
