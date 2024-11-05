@@ -568,8 +568,12 @@ const ProjectAdmin = () => {
                         <td>#{index + 1} </td>
                         <td>
                           <img
-                            src={i?.projectImage}
-                            alt={i?.projectName}
+                            src={
+                              i?.projectImage.startsWith("https://res.cloudinary.com")
+                                ? i.projectImage
+                                : `https://backend-interior.onrender.com/${i.projectImage}`
+                            }
+                            alt={i?.projectName || "Project Image"}
                             style={{ width: "100px" }}
                           />
                         </td>
